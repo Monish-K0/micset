@@ -1,0 +1,57 @@
+import pandas as pd
+import seaborn as sns 
+import matplotlib.pyplot as plt
+import numpy as np
+from sklearn.datasets import load_breast_cancer
+from sklearn.metrics import confusion_matrix,classification_report
+from sklearn.cluster import KMeans
+from sklearn.decomposition import PCA
+from sklearn.preprocessing import StandardScaler
+
+data=load_breast_cancer()
+X=data.data
+y=data.target
+
+scaler=StandardScaler()
+X_sca=scaler.fit_transform(X)
+
+kmeans=KMeans(n_clusters=2,n_init=10,random_state=42)
+y_kmeans=kmeans.fit_predict(X_sca)
+
+print("\nConfusion Matrix:")
+print(confusion_matrix(y,y_kmeans))
+print("\nClassification Report:")
+print(classification_report(y,y_kmeans))
+
+pca=PCA(n_components=2)
+X_pca=pca.fit_transform(X_sca)
+
+df=pd.DataFrame(X_pca,columns=["PC1","PC2"])
+df["Cluster"]=y_kmeans
+df["True Label"]=y
+
+plt.figure(figsize=(8,6))
+sns.scatterplot(data=df,x="PC1",y="PC2",hue="Cluster",palette="Set1",s=100,alpha=0.7,edgecolor="black")
+plt.title("Kmeans Clustering ")
+plt.xlabel("PC1")
+plt.ylabel("PC2")
+plt.legend(title="Cluster")
+plt.show()
+
+plt.figure(figsize=(8,6))
+sns.scatterplot(data=df,x="PC1",y="PC2",hue="True Label",palette="coolwarm",s=100,alpha=0.7,edgecolor="black")
+plt.title("True Label")
+plt.xlabel("PC1")
+plt.ylabel("PC2")
+plt.legend(title="True Label")
+plt.show()
+
+plt.figure(figsize=(8,6))
+sns.scatterplot(data=df,x="PC1",y="PC2",hue="Cluster",palette="Set1",s=100,alpha=0.7,edgecolor="black")
+centers=pca.transform(kmeans.cluster_centers_)
+plt.scatter(centers[:,0],centers[:,1],c="red",marker="X",label="Centroid",s=200)
+plt.title("Kmeans Clustering ")
+plt.xlabel("PC1")
+plt.ylabel("PC2")
+plt.legend(title="Cluster")
+plt.show()
