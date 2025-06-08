@@ -1,0 +1,54 @@
+class Node:
+def __init__(self, name, heuristic, node_type, children=None):
+self.name = name
+self.heuristic = heuristic
+self.node_type = node_type # 'AND' or 'OR' self.children = children or []
+self.solution = None
+self.cost = float('inf') # Initialize cost to infinity
+def ao_star(graph, start):
+open_nodes = [start]
+while open_nodes:
+node = open_nodes.pop(0)
+# If it's an OR node, find the child with the minimum expected cost
+if node.node_type == 'OR':
+min_cost = float('inf')
+chosen_child = None
+for child in node.children:
+child_cost = child.heuristic + child.cost
+if child_cost < min_cost:
+min_cost = child_cost
+chosen_child = child
+node.solution = chosen_child
+node.cost = chosen_child.heuristic + chosen_child.cost
+# If it's an AND node, sum the costs of all children
+elif node.node_type == 'AND':
+total_cost = 0
+for child in node.children:
+total_cost += child.heuristic + child.cost
+node.cost = total_cost
+# Add non-terminal children of the current node to open_nodes
+for child in node.children:
+if child.solution is None:
+open_nodes.append(child)
+# Sort open nodes by estimated cost (heuristic + cost)
+open_nodes.sort(key=lambda x: x.heuristic + x.cost)
+# The solution for the start node
+return start
+# Example usage:
+nodes = {
+'A': Node('A', 3, 'OR'),
+'B': Node('B', 2, 'AND'),
+'C': Node('C', 2, 'OR'),
+'D': Node('D', 1, 'AND'),
+'E': Node('E', 1, 'OR')
+}
+# Defining the graph connections
+nodes['A'].children = [nodes['B'], nodes['C']]
+nodes['B'].children = [nodes['D'], nodes['E']]
+nodes['C'].children = [nodes['D']]
+nodes['D'].children = []
+nodes['E'].children = []
+# Running the AO* algorithm
+solution_node = ao_star(nodes, nodes['A'])
+print("Solution path from A:", solution_node.solution.name)
+
